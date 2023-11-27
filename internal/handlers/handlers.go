@@ -42,6 +42,9 @@ func API(a auth.Authentication, s services.UserService) *gin.Engine {
 	r.GET("/jobs/jid", m.AuthenticationMiddleware(h.getOneJob))
 
 	r.POST("/process/applications", m.AuthenticationMiddleware(h.processApplications))
+	r.POST("/forget",h.ForgotPassword)
+	r.POST("/password",h.SetNewPassword)
+
 
 	return r
 }

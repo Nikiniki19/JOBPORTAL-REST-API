@@ -27,3 +27,9 @@ type ForgotPassword struct {
 	Email string `json:"email" validate:"required"`
 	Dob   string `json:"dob" validate:"required"`
 }
+type OtpPassword struct {
+	Email           string `json:"email" validate:"required"`
+	Otp             string `json:"otp" validate:"required"`
+	Password        string `json:"password" validate:"required"`
+	ConfirmPassword string `json:"confirmpassword" validate:"required"`
+}

@@ -11,7 +11,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -228,32 +227,31 @@ func Test_handler_Login(t *testing.T) {
 				mc := gomock.NewController(t)
 				ms := services.NewMockUserService(mc)
 				ms.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(jwt.RegisteredClaims{}, errors.New("error"))
-			
+
 				return c, rr, ms, nil
 			},
 			expectedStatusCode: http.StatusUnauthorized,
 			expectedResponse:   `{"msg":"login failed"}`,
 		},
 		{name: " failure in generating token",
-		setup: func() (*gin.Context, *httptest.ResponseRecorder, services.UserService, auth.Authentication) {
-			rr := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(rr)
-			httpRequest, _ := http.NewRequest(http.MethodGet, "http://tests.com", strings.NewReader(`{"email":"qwerty@gmail.com","password":"1234"}`))
-			ctx := httpRequest.Context()
-			ctx = context.WithValue(ctx, middlewares.TraceIdKey, "1")
-			httpRequest = httpRequest.WithContext(ctx)
-			c.Request = httpRequest
-			mc := gomock.NewController(t)
-			ms := services.NewMockUserService(mc)
-			ma:=auth.NewMockAuthentication(mc)
-			ms.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(jwt.RegisteredClaims{},nil)
-		    ma.EXPECT().GenerateToken(gomock.Any()).Return("",errors.New("error in generating token"))
-			return c, rr, ms, ma
+			setup: func() (*gin.Context, *httptest.ResponseRecorder, services.UserService, auth.Authentication) {
+				rr := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(rr)
+				httpRequest, _ := http.NewRequest(http.MethodGet, "http://tests.com", strings.NewReader(`{"email":"qwerty@gmail.com","password":"1234"}`))
+				ctx := httpRequest.Context()
+				ctx = context.WithValue(ctx, middlewares.TraceIdKey, "1")
+				httpRequest = httpRequest.WithContext(ctx)
+				c.Request = httpRequest
+				mc := gomock.NewController(t)
+				ms := services.NewMockUserService(mc)
+				ma := auth.NewMockAuthentication(mc)
+				ms.EXPECT().Login(gomock.Any(), gomock.Any(), gomock.Any()).Return(jwt.RegisteredClaims{}, nil)
+				ma.EXPECT().GenerateToken(gomock.Any()).Return("", errors.New("error in generating token"))
+				return c, rr, ms, ma
+			},
+			expectedStatusCode: http.StatusInternalServerError,
+			expectedResponse:   `{"msg":"Internal Server Error"}`,
 		},
-		expectedStatusCode: http.StatusInternalServerError,
-		expectedResponse:  `{"msg":"Internal Server Error"}`,
-	},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -28,12 +28,21 @@ func (r *Repo) CheckEmail(ctx context.Context, email string) (models.User, error
 	return userDetails, nil
 
 }
-func(r * Repo)ValidateEmail(ctx context.Context,email string)(models.ForgotPassword,error){
-	var validemail models.ForgotPassword
-	res:=r.DB.Where("email=?",email).First(&validemail)
-	if res.Error!=nil{
-		log.Info().Err(res.Error).Send()
-		return models.ForgotPassword{},errors.New("email not matched")
+func(r * Repo)UpdatePwdInDb(ctx context.Context,email string,user models.User)(models.User,error){
+	var userDetails models.User
+	err:=r.DB.Where("email=?",email).First(&userDetails).Error
+	if err!=nil{
+		return models.User{},err
 	}
-	return validemail,nil
-}
+    userDetails.PasswordHash=user.PasswordHash
+		res:=r.DB.Save(&userDetails).Error
+		if res!=nil{
+			return models.User{},errors.New("password not updated in db")
+		}
+		return userDetails,nil
+	}
+	
+
+	
+
+

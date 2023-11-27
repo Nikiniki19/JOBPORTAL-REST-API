@@ -11,6 +11,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
+
 //go:generate mockgen -source=cache.go -destination=cache_mock.go -package=caching
 type Redis struct {
 	rdb *redis.Client
@@ -18,6 +19,8 @@ type Redis struct {
 type Cache interface {
 	AddCache(ctx context.Context, jobid uint, jobData models.Job) error
 	GetCache(ctx context.Context, jobid uint) (string, error)
+	AddEmailToCache(ctx context.Context, email string, otp string) error
+	GetEmailFromCache(ctx context.Context, otp string) (string, error)
 }
 
 func NewRedis(rdb *redis.Client) (Cache, error) {
@@ -43,4 +46,19 @@ func (re *Redis) GetCache(ctx context.Context, jobid uint) (string, error) {
 	jobID := strconv.FormatUint(uint64(jobid), 10)
 	str, err := re.rdb.Get(ctx, jobID).Result()
 	return str, err
+}
+
+func (re *Redis) AddEmailToCache(ctx context.Context,email string, otp string) error {
+	err := re.rdb.Set(ctx,email, otp, 1*time.Minute)
+	if err != nil {
+		return errors.New("email and otp is not in cache")
+	}
+	return nil
+}
+func (re *Redis) GetEmailFromCache(ctx context.Context, otp string) (string, error) {
+	str, err := re.rdb.Get(ctx, otp).Result()
+	if err != nil {
+		return "", errors.New("cannot get otp from cache")
+	}
+	return str, nil
 }

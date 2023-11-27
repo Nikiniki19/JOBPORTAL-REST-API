@@ -97,42 +97,70 @@ func (h *handler) Signin(c *gin.Context) {
 	}
 
 	// If everything goes right, respond with the token
-	c.JSON(http.StatusOK, gin.H{"token":tkn})
+	c.JSON(http.StatusOK, tkn)
 
 }
-func(h *handler)ForgotPassword(c *gin.Context){
-	ctx:=c.Request.Context()
-	traceid,ok:=ctx.Value(middlewares.TraceIdKey).(string)
-	if !ok{
+
+func (h *handler) ForgotPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+	traceid, ok := ctx.Value(middlewares.TraceIdKey).(string)
+	if !ok {
 		log.Error().Msg("traceid missing from context")
-		c.AbortWithStatusJSON(http.StatusInternalServerError,gin.H{"error":http.StatusText(http.StatusInternalServerError)})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
-	 var fp models.ForgotPassword
-	 err:=json.NewDecoder(c.Request.Body).Decode(&fp)
-	 if err!=nil{
-		log.Error().Str("traceid",traceid).Msg("error in decoding")
-		c.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"error":http.StatusText(http.StatusBadRequest)})
+	var fp models.ForgotPassword
+	err := json.NewDecoder(c.Request.Body).Decode(&fp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in decoding")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
 		return
-	 }
-
-	 validate:=validator.New()
-	 err=validate.Struct(fp)
-	 if err!=nil{
-		log.Error().Str("traceid",traceid).Msg("error in validating")
-		c.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"error":http.StatusText(http.StatusBadRequest)})
-		return
-	 }
-      
-	valid,err:=h.s.OTPGeneration()
-	if err!=nil{
-	   log.Error().Str("traceid",traceid).Msg("error in generating otp")
-	   c.AbortWithStatusJSON(http.StatusInternalServerError,gin.H{"error":http.StatusText(http.StatusInternalServerError)})
-	   return
 	}
 
+	validate := validator.New()
+	err = validate.Struct(fp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in validating")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
+		return
+	}
 
+    _,otp ,err := h.s.OTPGeneration(ctx, fp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in generating otp")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	c.JSON(http.StatusOK,otp)
+}
 
-
-
+func (h *handler) SetNewPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+	traceid, ok := ctx.Value(middlewares.TraceIdKey).(string)
+	if !ok {
+		log.Error().Msg("traceid missing from context")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	var verifyotp models.OtpPassword
+	err := json.NewDecoder(c.Request.Body).Decode(&verifyotp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in decoding")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(verifyotp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in validating")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
+		return
+	}
+	 pwd,err := h.s.ChangePassword(ctx,verifyotp)
+	if err != nil {
+		log.Error().Str("traceid", traceid).Msg("error in generating new password")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	c.JSON(http.StatusOK,pwd)
 }
