@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"job-portal-api/internal/models"
 	"strconv"
 	"time"
@@ -48,17 +49,20 @@ func (re *Redis) GetCache(ctx context.Context, jobid uint) (string, error) {
 	return str, err
 }
 
-func (re *Redis) AddEmailToCache(ctx context.Context,email string, otp string) error {
-	err := re.rdb.Set(ctx,email, otp, 1*time.Minute)
+func (re *Redis) AddEmailToCache(ctx context.Context, email string, otp string) error {
+	err := re.rdb.Set(ctx, email, otp, 5*time.Minute).Err()
+	fmt.Println("[[[[[[[[[[]]]]]]]]]]", err)
 	if err != nil {
-		return errors.New("email and otp is not in cache")
+		log.Err(err).Msg("error while adding==================")
+		return fmt.Errorf("error while adding to redis : otp : %w = ", err)
 	}
 	return nil
 }
-func (re *Redis) GetEmailFromCache(ctx context.Context, otp string) (string, error) {
-	str, err := re.rdb.Get(ctx, otp).Result()
+func (re *Redis) GetEmailFromCache(ctx context.Context, email string) (string, error) {
+	str, err := re.rdb.Get(ctx, email).Result()
 	if err != nil {
-		return "", errors.New("cannot get otp from cache")
+		log.Err(err).Msg("error while getting=======================")
+		return "", err
 	}
 	return str, nil
 }

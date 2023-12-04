@@ -28,21 +28,10 @@ func (r *Repo) CheckEmail(ctx context.Context, email string) (models.User, error
 	return userDetails, nil
 
 }
-func(r * Repo)UpdatePwdInDb(ctx context.Context,email string,user models.User)(models.User,error){
-	var userDetails models.User
-	err:=r.DB.Where("email=?",email).First(&userDetails).Error
-	if err!=nil{
-		return models.User{},err
+func (r *Repo) UpdatePwdInDb(user models.User) error {
+	res := r.DB.Save(&user).Error
+	if res != nil {
+		return errors.New("password not updated in db")
 	}
-    userDetails.PasswordHash=user.PasswordHash
-		res:=r.DB.Save(&userDetails).Error
-		if res!=nil{
-			return models.User{},errors.New("password not updated in db")
-		}
-		return userDetails,nil
-	}
-	
-
-	
-
-
+	return nil
+}

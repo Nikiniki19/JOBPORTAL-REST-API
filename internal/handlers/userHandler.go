@@ -125,13 +125,13 @@ func (h *handler) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-    _,otp ,err := h.s.OTPGeneration(ctx, fp)
+	otp, err := h.s.OTPGeneration(ctx, fp)
 	if err != nil {
 		log.Error().Str("traceid", traceid).Msg("error in generating otp")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
-	c.JSON(http.StatusOK,otp)
+	c.JSON(http.StatusOK, otp)
 }
 
 func (h *handler) SetNewPassword(c *gin.Context) {
@@ -156,11 +156,11 @@ func (h *handler) SetNewPassword(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
 		return
 	}
-	 pwd,err := h.s.ChangePassword(ctx,verifyotp)
+	pwd, err := h.s.ChangePassword(ctx, verifyotp)
 	if err != nil {
 		log.Error().Str("traceid", traceid).Msg("error in generating new password")
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
-	c.JSON(http.StatusOK,pwd)
+	c.JSON(http.StatusOK, pwd)
 }

@@ -16,7 +16,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-var otp string
+
+// var otp string
 func (s *Service) Signup(ctx context.Context, nu models.NewUser) (models.User, error) {
 	hashedPass, err := pkg.PasswordHash(nu.Password)
 	if err != nil {
@@ -64,10 +65,10 @@ func (s *Service) Login(ctx context.Context, email, password string) (jwt.Regist
 	return c, nil
 }
 
-func (s *Service) OTPGeneration(ctx context.Context, data models.ForgotPassword) (bool, string, error) {
+func (s *Service) OTPGeneration(ctx context.Context, data models.ForgotPassword) (string, error) {
 	check, err := s.UserRepo.CheckEmail(ctx, data.Email)
 	if err != nil {
-		return false, "", errors.New("email not found in db")
+		return "", errors.New("email not found in db")
 	}
 
 	// Sender's email address and password
@@ -80,14 +81,14 @@ func (s *Service) OTPGeneration(ctx context.Context, data models.ForgotPassword)
 	// SMTP server details
 	smtpServer := "smtp.gmail.com"
 	smtpPort := 587
-	otp = generateOTP(4)
+	otp := generateOTP(4)
 	// Message content
-	message := fmt.Sprintf("Subject: Test Email\n\nThis is a test email body.", otp)
+	message := fmt.Sprintf("subject: reset password\n\notp to reset password is : %v", otp)
 	//adding otp to cache
-	// err = s.rdb.AddEmailToCache(ctx, check.Email, otp)
-	// if err != nil {
-	// 	return false, "", err
-	// }
+	err = s.rdb.AddEmailToCache(ctx, check.Email, otp)
+	if err != nil {
+		return "", err
+	}
 	// Authentication information
 	auth := smtp.PlainAuth("", from, password, smtpServer)
 
@@ -96,11 +97,11 @@ func (s *Service) OTPGeneration(ctx context.Context, data models.ForgotPassword)
 	err = smtp.SendMail(smtpAddr, auth, from, []string{to.Email}, []byte(message))
 	if err != nil {
 		//fmt.Println("Error sending email:", err)
-		return false, "", errors.New("error sending email:")
+		return "", errors.New("error sending email")
 	}
 
 	fmt.Println("Email sent successfully!")
-	return true, otp, nil
+	return otp, nil
 
 }
 
@@ -121,12 +122,13 @@ func generateOTP(length int) string {
 }
 
 func (s *Service) ChangePassword(ctx context.Context, cj models.OtpPassword) (string, error) {
-	val, _ := s.rdb.GetEmailFromCache(ctx, cj.Otp)
-	// if err != nil {
-	// 	return "", err
-	// }
+	v, err := s.rdb.GetEmailFromCache(ctx, cj.Email)
+	if err != nil {
+		fmt.Println("there is an error in GetEmailFromCache ")
+		//return "", err
+	}
 
-	if val != otp {
+	if v == cj.Otp {
 		if cj.Password == cj.ConfirmPassword {
 			newuserotp, err := s.UserRepo.CheckEmail(ctx, cj.Email)
 			if err != nil {
@@ -136,16 +138,17 @@ func (s *Service) ChangePassword(ctx context.Context, cj models.OtpPassword) (st
 			if err != nil {
 				return "", errors.New("error in pwd hash")
 			}
-			details := models.User{
-				Name:         newuserotp.Name,
-				PasswordHash: hashedPass,
-			}
-			_, err = s.UserRepo.UpdatePwdInDb(ctx, cj.Email, details)
+			newuserotp.PasswordHash = hashedPass
+			err = s.UserRepo.UpdatePwdInDb(newuserotp)
 			if err != nil {
 				return "", errors.New("password not matching")
 			}
 
+		} else {
+			return "", errors.New("old password and confirm password mismatched")
 		}
+	} else {
+		return "", errors.New("invalid otp")
 	}
-	return "pwd set", nil
+	return "PASSWORD CHANGED SUCCESSFULLY", nil
 }

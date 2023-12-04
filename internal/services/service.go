@@ -18,7 +18,6 @@ type UserService interface {
 	Signup(ctx context.Context, userData models.NewUser) (models.User, error)
 	Login(ctx context.Context, email, password string) (jwt.RegisteredClaims, error)
 
-
 	AddCompanyDetails(ctx context.Context, companyData models.Company) (models.Company, error)
 	ViewAllCompanies(ctx context.Context) ([]models.Company, error)
 	ViewCompanyDetails(ctx context.Context, id uint64) (models.Company, error)
@@ -29,9 +28,8 @@ type UserService interface {
 	ViewJobById(ctx context.Context, jid uint64) ([]models.Job, error)
 
 	ProcessJobApplications(appData []models.NewUserApplication) ([]models.NewUserApplication, error)
-	OTPGeneration(ctx context.Context,data models.ForgotPassword)(bool,string,error)
-	ChangePassword(ctx context.Context, otp models.OtpPassword)(string,error)
-
+	OTPGeneration(ctx context.Context, data models.ForgotPassword) (string, error)
+	ChangePassword(ctx context.Context, otp models.OtpPassword) (string, error)
 }
 
 type Service struct {

@@ -26,9 +26,7 @@ type UserRepo interface {
 	GetCompany(id uint64) (models.Company, error)
 
 	FetchJobData(jid uint64) (models.Job, error)
-	UpdatePwdInDb(ctx context.Context,email string,user models.User)(models.User,error)
-
-	
+	UpdatePwdInDb(user models.User)error
 }
 
 func NewRepository(DB *gorm.DB) (UserRepo, error) {
