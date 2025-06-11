@@ -5,6 +5,7 @@
 //
 //	mockgen -source=repo.go -destination=repo_mock.go -package=repository
 //
+
 // Package repository is a generated GoMock package.
 package repository
 
@@ -187,4 +188,18 @@ func (m *MockUserRepo) PostJob(nj models.Job) (models.Response, error) {
 func (mr *MockUserRepoMockRecorder) PostJob(nj any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostJob", reflect.TypeOf((*MockUserRepo)(nil).PostJob), nj)
+}
+
+// UpdatePwdInDb mocks base method.
+func (m *MockUserRepo) UpdatePwdInDb(user models.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePwdInDb", user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePwdInDb indicates an expected call of UpdatePwdInDb.
+func (mr *MockUserRepoMockRecorder) UpdatePwdInDb(user any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePwdInDb", reflect.TypeOf((*MockUserRepo)(nil).UpdatePwdInDb), user)
 }
