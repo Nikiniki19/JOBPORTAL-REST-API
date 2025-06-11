@@ -4,6 +4,7 @@ import (
 	"log"
 
 	env "github.com/Netflix/go-env"
+	"github.com/joho/godotenv"
 )
 
 var cfg Config
@@ -12,7 +13,7 @@ type Config struct {
 	AppConfig      AppConfig
 	PostgresConfig PostgresConfig
 	AuthConfig     AuthConfig
-	RedisConfig  RedisConfig
+	RedisConfig    RedisConfig
 }
 type AppConfig struct {
 	Port         string `env:"APP_PORT,required=true"`
@@ -41,6 +42,8 @@ type RedisConfig struct {
 }
 
 func init() {
+	_ = godotenv.Load(".env", ".postgres.env", ".auth.env", ".redis.env",".job.postgres.env") 
+
 	_, err := env.UnmarshalFromEnviron(&cfg)
 	if err != nil {
 		log.Panic(err)

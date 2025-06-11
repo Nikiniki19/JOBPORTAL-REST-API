@@ -31,12 +31,10 @@ func OpenConnection() (*gorm.DB, error) {
 		// If there is an error while migrating, log the error message and stop the program
 		return nil, err
 	}
-	//fmt.Println("hihihihi", db)
 	err = db.Migrator().AutoMigrate(
 		&models.User{},
 		&models.Company{},
 		&models.Job{},
-
 		&models.Location{},
 		&models.Skill{},
 		&models.WorkMode{},

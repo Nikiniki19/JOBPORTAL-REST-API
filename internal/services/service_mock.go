@@ -5,6 +5,7 @@
 //
 //	mockgen -source=service.go -destination=service_mock.go -package=services
 //
+
 // Package services is a generated GoMock package.
 package services
 
@@ -70,6 +71,21 @@ func (mr *MockUserServiceMockRecorder) AddJobDetails(ctx, jobData, cid any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddJobDetails", reflect.TypeOf((*MockUserService)(nil).AddJobDetails), ctx, jobData, cid)
 }
 
+// ChangePassword mocks base method.
+func (m *MockUserService) ChangePassword(ctx context.Context, otp models.OtpPassword) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ChangePassword", ctx, otp)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ChangePassword indicates an expected call of ChangePassword.
+func (mr *MockUserServiceMockRecorder) ChangePassword(ctx, otp any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUserService)(nil).ChangePassword), ctx, otp)
+}
+
 // Login mocks base method.
 func (m *MockUserService) Login(ctx context.Context, email, password string) (jwt.RegisteredClaims, error) {
 	m.ctrl.T.Helper()
@@ -85,19 +101,34 @@ func (mr *MockUserServiceMockRecorder) Login(ctx, email, password any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockUserService)(nil).Login), ctx, email, password)
 }
 
-// ProcessJobApplications mocks base method.
-func (m *MockUserService) ProcessJobApplications(ctappData []models.NewUserApplication) ([]models.NewUserApplication, error) {
+// OTPGeneration mocks base method.
+func (m *MockUserService) OTPGeneration(ctx context.Context, data models.ForgotPassword) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ProcessJobApplications", ctappData)
+	ret := m.ctrl.Call(m, "OTPGeneration", ctx, data)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OTPGeneration indicates an expected call of OTPGeneration.
+func (mr *MockUserServiceMockRecorder) OTPGeneration(ctx, data any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OTPGeneration", reflect.TypeOf((*MockUserService)(nil).OTPGeneration), ctx, data)
+}
+
+// ProcessJobApplications mocks base method.
+func (m *MockUserService) ProcessJobApplications(appData []models.NewUserApplication) ([]models.NewUserApplication, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProcessJobApplications", appData)
 	ret0, _ := ret[0].([]models.NewUserApplication)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ProcessJobApplications indicates an expected call of ProcessJobApplications.
-func (mr *MockUserServiceMockRecorder) ProcessJobApplications(ctappData any) *gomock.Call {
+func (mr *MockUserServiceMockRecorder) ProcessJobApplications(appData any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessJobApplications", reflect.TypeOf((*MockUserService)(nil).ProcessJobApplications), ctappData)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessJobApplications", reflect.TypeOf((*MockUserService)(nil).ProcessJobApplications), appData)
 }
 
 // Signup mocks base method.
