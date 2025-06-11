@@ -30,7 +30,7 @@ func API(a auth.Authentication, s services.UserService) *gin.Engine {
 	r.GET("/check", m.AuthenticationMiddleware(check))
 	//users endpoint
 	r.POST("/signup", h.Registration)
-	r.POST("/login", h.Signin)
+	r.POST("/login", m.AuthenticationMiddleware(h.Signin))
 	//company endpoint
 	r.POST("/createCompany", m.AuthenticationMiddleware(h.createCom))
 	r.GET("/getallcompanies", m.AuthenticationMiddleware(h.getAllTheCompanies))
@@ -42,9 +42,8 @@ func API(a auth.Authentication, s services.UserService) *gin.Engine {
 	r.GET("/jobs/jid", m.AuthenticationMiddleware(h.getOneJob))
 
 	r.POST("/process/applications", m.AuthenticationMiddleware(h.processApplications))
-	r.POST("/forget",h.ForgotPassword)
-	r.POST("/password",h.SetNewPassword)
-
+	r.POST("/forget", h.ForgotPassword)
+	r.POST("/password", h.SetNewPassword)
 
 	return r
 }
